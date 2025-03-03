@@ -25,8 +25,8 @@ if __name__ == "__main__":
         raise
 
     # This allows easy placement of apps within the interior
-    # thought_swap directory.
+    # thoughtswap directory.
     current_path = Path(__file__).parent.resolve()
-    sys.path.append(str(current_path / "thought_swap"))
+    sys.path.append(str(current_path / "thoughtswap"))
 
     execute_from_command_line(sys.argv)

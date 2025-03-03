@@ -1,11 +1,11 @@
-# Thought Swap
+# ThoughtSwap
 
-Thought Swap is a discussion facilitation platform that enables participants to anonymously respond to prompts, swap responses with others, and engage in structured conversations.
+A project,
 
 [![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
-License: GPLv3
+License: MIT
 
 ## Settings
 
@@ -27,7 +27,7 @@ For convenience, you can keep your normal user logged in on Chrome and your supe
 
 Running type checks with mypy:
 
-    $ mypy thought_swap
+    $ mypy thoughtswap
 
 ### Test coverage
 

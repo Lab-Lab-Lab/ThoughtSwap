@@ -7,7 +7,7 @@ SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = .
 BUILDDIR      = ./_build
-APP = ../thought_swap
+APP = ../thoughtswap
 
 
 .PHONY: html livehtml apidocs Makefile

@@ -4,14 +4,14 @@ How To - Project Documentation
 Get Started
 ----------------------------------------------------------------------
 
-Documentation can be written as rst files in `thought_swap/docs`.
+Documentation can be written as rst files in `thoughtswap/docs`.
 
 
 To build and serve docs, use the command::
 
     make livehtml
 
-from inside the `thought_swap/docs` directory.
+from inside the `thoughtswap/docs` directory.
 
 
 Changes to files in `docs/_source` will be picked up and reloaded automatically.

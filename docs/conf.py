@@ -27,7 +27,7 @@ django.setup()
 
 # -- Project information -----------------------------------------------------
 
-project = "Thought Swap"
+project = "ThoughtSwap"
 copyright = """2025, Thomas Brickhouse"""
 author = "Thomas Brickhouse"
 
