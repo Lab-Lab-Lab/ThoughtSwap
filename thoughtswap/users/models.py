@@ -32,33 +32,3 @@ class User(AbstractUser):
 
         """
         return reverse("users:detail", kwargs={"username": self.username})
-
-
-class Course(models.Model):
-    """
-    Model representing a course.
-    """
-
-    creator = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    participants = models.ManyToManyField(User, related_name="courses")
-    code = models.CharField(max_length=6, unique=True, default=generate_unique_code)
-
-
-class Prompt(models.Model):
-    """
-    Model representing a prompt.
-    """
-
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
-
-
-class Thought(models.Model):
-    """
-    Model representing a thought.
-    """
-
-    prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
