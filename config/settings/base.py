@@ -5,6 +5,7 @@
 from pathlib import Path
 
 import environ
+import thoughtswap
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # thoughtswap/
@@ -97,6 +98,7 @@ LOCAL_APPS = [
     "thoughtswap.users",
     "chat",
     # Your stuff: custom apps go here
+    "thoughtswap.thoughtswap"
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
