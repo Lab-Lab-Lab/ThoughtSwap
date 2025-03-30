@@ -61,7 +61,9 @@ class Prompt(models.Model):
 
 
 class Session(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.OneToOneField(
+        Course, on_delete=models.CASCADE, related_name="session"
+    )
 
     SESSION_STATE = (
         ("a", "Active"),
@@ -80,6 +82,9 @@ class Session(models.Model):
     end = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.state}"
 
 
 # 2 use cases:

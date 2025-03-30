@@ -1,19 +1,50 @@
-<h1>Teacher Dashboard</h1>
-<h3>My Prompts</h3>
-<ul>
-    {% for prompt in prompts %}
-    <li>{{ prompt.content }}</li>
-    {% endfor %}
-</ul>
-
-<h3>My Students</h3>
-<ul>
-    {% for student in students %}
-    <li>{{ student.username }}</li>
-    {% endfor %}
-</ul>
+<h2>Teacher Dashboard</h2>
 
 <h3>My Courses</h3>
 <ul>
-    <li>{{ course.title}} : {{course.join_code}}</li>
+    {% for course in courses %}
+    <li>
+        <button onclick="showStudents('{{ course.id }}')">{{ course.title }}</button> : {{ course.join_code }} :
+        {{course.session}}
+        <button onclick="updateSessionStatus('{{ course.session.id }}', 'a')">Active</button>
+        <button onclick="updateSessionStatus('{{ course.session.id }}', 'i')">Inactive</button>
+        <button onclick="updateSessionStatus('{{ course.session.id }}', 'd')">Draft</button>
+
+        <ul id="students-{{ course.id }}" style="display: none;">
+            {% for enrollment in course.enrollment_set.all %}
+            {% if enrollment.role == "s" %}
+            <li>{{ enrollment.user.username }}</li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
 </ul>
+
+<script>
+    function showStudents(courseId) {
+        const list = document.getElementById(`students-${courseId}`);
+        const usernames = Array.from(list.children).map(li => li.textContent.trim());
+        alert("Students:\n" + usernames.join("\n"));
+    }
+
+    function updateSessionStatus(sessionId, status) {
+        console.log("Updating session status for sessionId: ", sessionId, " to status: ", status);
+        csrf_token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        console.log("Token: ", csrf_token);
+        fetch('/update-session-status/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({
+                session_id: sessionId,
+                status: status
+            })
+        })
+            .then(data => {
+                alert(data);
+            });
+    }
+</script>

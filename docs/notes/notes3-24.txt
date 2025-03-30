@@ -1,0 +1,29 @@
+Plan for the week 3/24:
+
+Goal: MVP
+start with few apps, and then if it gets cosfusing, refactor it out
+if i code soemthung bad, not it with an "issue" and then move forward
+
+- Look at the models and create views. we have instances of everything 
+via data migrations and will worry about how users etc are created through 
+the interface later 
+
+- 0003_seed_example: this is the example data that exists in the database 
+that will be used in the views. This will later be fixed to be able to be
+instaciated with an interfcae but for now the data will exist here
+
+**
+
+
+
+
+Questions:
+- Best practice for creating a button?
+- Why do users not have first_name and last_name?
+- dashbaord vs teacher_dashbaord + (student_active_session vs teacher_active_session(Dont remember what this means)) 
+- Session object is connected to a course. I think it should be the other way around becuase when I am trying to access
+weather a course is active or not, it feels wroing to find the session object and not the course object.
+        - Changed to a OneToOne from ManyToMany and did not switch the session and course objects around
+- Best way to update a field in the db? 
+    -  AJAX request?
+- Cannot update the status of a session. Error message is in the terminal.
