@@ -1,0 +1,15 @@
+Plan for the week 3/24:
+
+Goal: MVP
+start with few apps, and then if it gets cosfusing, refactor it out
+if i code soemthung bad, not it with an "issue" and then move forward
+
+- Look at the models and create views. we have instances of everything 
+via data migrations and will worry about how users etc are created through 
+the interface later 
+
+- 0003_seed_example: this is the example data that exists in the database 
+that will be used in the views. This will later be fixed to be able to be
+instaciated with an interfcae but for now the data will exist here
+
+**

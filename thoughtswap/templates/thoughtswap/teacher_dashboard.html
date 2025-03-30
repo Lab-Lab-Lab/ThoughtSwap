@@ -1,0 +1,19 @@
+<h1>Teacher Dashboard</h1>
+<h3>My Prompts</h3>
+<ul>
+    {% for prompt in prompts %}
+    <li>{{ prompt.content }}</li>
+    {% endfor %}
+</ul>
+
+<h3>My Students</h3>
+<ul>
+    {% for student in students %}
+    <li>{{ student.username }}</li>
+    {% endfor %}
+</ul>
+
+<h3>My Courses</h3>
+<ul>
+    <li>{{ course.title}} : {{course.join_code}}</li>
+</ul>

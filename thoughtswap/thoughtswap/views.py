@@ -1,3 +1,59 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
+from thoughtswap.users.models import User
+from .models import Enrollment, Prompt, Course, Session
+from django.contrib.auth.decorators import login_required
+from django.utils.timezone import now
 
-# Create your views here.
+
+def prompt_list(request):
+    prompts = Prompt.objects.all()
+    return render(request, "thoughtswap/prompt_list.html", {"prompts": prompts})
+
+
+@login_required
+def teacher_dashboard(request):
+    prompts = Prompt.objects.all()
+    students = User.objects.filter(enrollment__role="s")
+    course = Course.objects.get(creator=request.user)
+    return render(request, "thoughtswap/teacher_dashboard.html", {"prompts": prompts, "students": students, "course": course})
+
+
+@login_required
+def join_course(request):
+    error = None
+
+    if request.method == "POST":
+        join_code = request.POST.get("join_code")
+
+        try:
+            course = Course.objects.get(join_code=join_code)
+        except Course.DoesNotExist:
+            error = "Invalid join code. Please try again."
+            return render(request, "thoughtswap/join_course.html", {"error": error})
+
+        existing = Enrollment.objects.filter(course=course, user=request.user).first()
+        if not existing:
+            Enrollment.objects.create(
+                course=course,
+                user=request.user,
+                role="P",
+                created_at=now(),
+                updated_at=now(),
+            )
+        return redirect("/thoughtswap/dashboard")
+
+    return render(request, "thoughtswap/join_course.html", {"error": error})
+
+
+@login_required
+def student_dashboard(request):
+    enrollments = Enrollment.objects.filter(user=request.user).select_related("course")
+
+    active_sessions = {s.course_id: s.id for s in Session.objects.filter(state="a")}
+    print("active_sessions", active_sessions)
+
+    return render(
+        request,
+        "thoughtswap/dashboard.html",
+        {"enrollments": enrollments, "active_sessions": active_sessions},
+    )

@@ -22,7 +22,7 @@ class Course(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.title
 
 
 # since the coockiecutter-django starter code has groups and permissions to go
@@ -72,7 +72,7 @@ class Session(models.Model):
     state = models.CharField(
         max_length=1,
         choices=SESSION_STATE,
-        default="d",
+        default="a",
         help_text="Session state",
     )
 

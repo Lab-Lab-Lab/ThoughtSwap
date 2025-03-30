@@ -18,7 +18,17 @@ def seed_mvp(apps, schema_editor):
     teacher = User.objects.create_user(
         username="teacher",
         email="teacher@thoughtswap.org",
-        password=make_password("teacher"),
+        password="teacher",
+    )
+    teacher.first_name = "Teacher"
+    teacher.last_name = "User"
+    teacher.save()
+
+    # create a second teacher
+    teacher2 = User.objects.create_user(
+        username="teacher2",
+        email="teacher2@thoughtswap.org",
+        password="teacher",
     )
     teacher.first_name = "Teacher"
     teacher.last_name = "User"
@@ -26,8 +36,13 @@ def seed_mvp(apps, schema_editor):
 
     # create a course
     course = Course.objects.create(
-        title="Example Course",
+        title="Example Course CS 455",
         creator=teacher,
+    )
+
+    course2 = Course.objects.create(
+        title="Example Course CS 227",
+        creator=teacher2,
     )
 
     # enroll the teacher in the course
@@ -37,24 +52,33 @@ def seed_mvp(apps, schema_editor):
         role="f",
     )
 
+    # enroll the teacher2 in the course
+    Enrollment.objects.create(
+        user=teacher2,
+        course=course2,
+        role="f",
+    )
+
     # create a student
     student1 = User.objects.create_user(
         username="student1",
         email="student1@thoughtswap.org",
-        password=make_password("student"),
+        password="student",
     )
-    student1.first_name = "Student1"
-    student1.last_name = "User"
-    student1.save()
+    # student1.first_name = "Student1"
+    # student1.last_name = "User"
+    # student1.save()
 
     student2 = User.objects.create_user(
         username="student2",
         email="student2@thoughtswap.org",
-        password=make_password("student"),
+        password="student",
+        # first_name = "Student2",
+        # last_name = "User"
     )
-    student2.first_name = "Student2"
-    student2.last_name = "User"
-    student2.save()
+    # student2.first_name = "Student2"
+    # student2.last_name = "User"
+    # student2.save()
 
     Enrollment.objects.create(
         user=student1,
