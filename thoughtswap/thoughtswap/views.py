@@ -12,8 +12,9 @@ def prompt_list(request):
     return render(request, "thoughtswap/prompt_list.html", {"prompts": prompts})
 
 
-@login_required
+@login_required # FIXME this would check the enrollment's ROLE to decide if this is visible
 def teacher_dashboard(request):
+
     facilitator = request.user
     courses = Course.objects.filter(creator=facilitator)
     sessions = Session.objects.filter(course__creator=facilitator).select_related(
@@ -30,16 +31,27 @@ def teacher_dashboard(request):
             enrollment__course=selected_course, enrollment__role="s"
         )
 
+    if request.method == "POST":
+        print("info", request.POST)
+        session_id = request.POST.get("course_session_id")
+        session = Session.objects.get(id=session_id)
+        session.state = request.POST.get("session_state")
+        session.save()
+        sessions = Session.objects.filter(course__creator=facilitator).select_related(
+            "course"
+        )
+
     context = {
         "courses": courses,
         "students": students,
         "selected_course": selected_course,
         "sessions": sessions,
     }
+
     return render(request, "thoughtswap/teacher_dashboard.html", context)
 
 
-def update_session_status(request): 
+def update_session_status(request):
     print("Received request to update session status\n\n\n\n")
     if request.method == "POST":
         data = json.loads(request.body)

@@ -4,19 +4,29 @@
 <ul>
     {% for course in courses %}
     <li>
-        <button onclick="showStudents('{{ course.id }}')">{{ course.title }}</button> : {{ course.join_code }} :
-        {{course.session}}
-        <button onclick="updateSessionStatus('{{ course.session.id }}', 'a')">Active</button>
-        <button onclick="updateSessionStatus('{{ course.session.id }}', 'i')">Inactive</button>
-        <button onclick="updateSessionStatus('{{ course.session.id }}', 'd')">Draft</button>
-
-        <ul id="students-{{ course.id }}" style="display: none;">
-            {% for enrollment in course.enrollment_set.all %}
-            {% if enrollment.role == "s" %}
-            <li>{{ enrollment.user.username }}</li>
-            {% endif %}
-            {% endfor %}
-        </ul>
+        <form action="" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="course_id" value="{{ course.id }}">
+            <input type="hidden" name="course_session_id" value="{{ course.session.id }}">
+            <button onclick="showStudents('{{ course.id }}')">{{ course.title }}</button> : {{ course.join_code }} :
+            <label for="state-a">a</label>
+            <input type="radio" name="session_state" id="state-a" value="a" {% if course.session.state == "a" %}checked{% endif %}>
+            <label for="state-i">i</label>
+            <input type="radio" name="session_state" id="state-i" value="i" {% if course.session.state == "i" %}checked{% endif %}>
+            <label for="state-d">d</label>
+            <input type="radio" name="session_state" id="state-d" value="d" {% if course.session.state == "d" %}checked{% endif %}>
+            <button onclick="updateSessionStatus('{{ course.session.id }}', 'a')">Active</button>
+            <button onclick="updateSessionStatus('{{ course.session.id }}', 'i')">Inactive</button>
+            <button onclick="updateSessionStatus('{{ course.session.id }}', 'd')">Draft</button>
+            <ul id="students-{{ course.id }}" style="display: none;">
+                {% for enrollment in course.enrollment_set.all %}
+                {% if enrollment.role == "s" %}
+                <li>{{ enrollment.user.username }}</li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+            <button type="submit">Submit</button>
+        </form>
     </li>
     {% endfor %}
 </ul>
