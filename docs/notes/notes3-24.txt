@@ -19,11 +19,15 @@ instaciated with an interfcae but for now the data will exist here
 
 Questions:
 - Best practice for creating a button?
+    - if its going to a new page, make it an anchor tag
+    - Use buttons for "actions" like the toggle between the states of a session
 - Why do users not have first_name and last_name?
 - dashbaord vs teacher_dashbaord + (student_active_session vs teacher_active_session(Dont remember what this means)) 
 - Session object is connected to a course. I think it should be the other way around becuase when I am trying to access
 weather a course is active or not, it feels wroing to find the session object and not the course object.
         - Changed to a OneToOne from ManyToMany and did not switch the session and course objects around
+        - CHANGE BACK TO FOREIGNKEY
 - Best way to update a field in the db? 
     -  AJAX request?
+    
 - Cannot update the status of a session. Error message is in the terminal.
