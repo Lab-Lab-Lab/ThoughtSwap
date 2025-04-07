@@ -1,0 +1,29 @@
+<script>
+    const socket = new WebSocket("ws://" + window.location.host + "/ws/thoughtswap/{{ course.join_code }}/");
+
+    socket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        console.log("WebSocket message received:", data);
+
+        if (data.type === "new_thought") {
+            const el = document.createElement("li");
+            el.innerText = data.content;
+            document.getElementById("responses").appendChild(el);
+        }
+    };
+
+    function sendPrompt() {
+        const content = document.getElementById("promptText").value;
+        socket.send(JSON.stringify({
+            type: "disperse_prompt",
+            content: content
+        }));
+        document.getElementById("promptText").value = "";
+    }
+
+
+</script>
+
+<textarea id="promptText" placeholder="Write a prompt..."></textarea>
+<button onclick="sendPrompt()">Send Prompt</button>
+<ul id="responses"></ul>

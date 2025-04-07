@@ -1,7 +1,7 @@
 <h2>Welcome, {{ user.username }}!</h2>
 
 <h3>Your Courses</h3>
-<button onclick="join_new_course()">Join a Course</button>
+<a href="/thoughtswap/join">Join a new course</a>
 
 {% if enrollments %}
 <ul>
@@ -11,7 +11,8 @@
         {{ course.title }}
 
         {% if course.id in active_sessions %}
-        <button onclick="join_course('{{ course.join_code }}')">Join</button>
+        <a href="{% url 'active_room' course.join_code %}">Join Session</a>
+        {% else %}
         {% endif %}
         {% endwith %}
     </li>
@@ -20,15 +21,3 @@
 {% else %}
 <p>You are not enrolled in any courses yet.</p>
 {% endif %}
-
-
-<script>
-    function join_new_course() {
-        window.location.href = "{% url 'join_course' %}";
-    }
-
-    function join_course(code) {
-        window.location.href = `/thoughtswap/${code}/`;
-    }
-
-</script>

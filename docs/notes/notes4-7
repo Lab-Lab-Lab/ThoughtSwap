@@ -1,0 +1,9 @@
+When deleting a bad thought, should it be perma deleted or just not visible on screen?
+    - What about an isDeleted field in the model set to false?
+
+TODO:
+- Display current prompt and all responses
+- Add a delete button to the responses
+- create a way to view old prompts
+- be able to resend old prompts with new promptUse? (is the separate proptUses just for the  back end / researchers?)
+- Groups...?

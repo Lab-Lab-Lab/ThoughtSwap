@@ -12,16 +12,26 @@ def prompt_list(request):
     return render(request, "thoughtswap/prompt_list.html", {"prompts": prompts})
 
 
-@login_required # FIXME this would check the enrollment's ROLE to decide if this is visible
-def teacher_dashboard(request):
+def get_latest_session(courses):
+    for course in courses:
+        # If you used related_name="sessions" in your Session model:
+        course.latest_session = course.sessions.order_by("-id").first()
 
+        # If you did NOT use related_name, uncomment the line below and comment the one above:
+        # course.latest_session = course.session_set.order_by('-id').first()
+
+
+@login_required  # FIXME this would check the enrollment's ROLE to decide if this is visible
+def teacher_dashboard(request):
     facilitator = request.user
     courses = Course.objects.filter(creator=facilitator)
+    get_latest_session(courses)
+
     sessions = Session.objects.filter(course__creator=facilitator).select_related(
         "course"
     )
 
-    course_id = request.GET.get("course_id")  # e.g. /dashboard?course_id=3
+    course_id = request.GET.get("course_id")
     selected_course = None
     students = []
 
@@ -37,9 +47,8 @@ def teacher_dashboard(request):
         session = Session.objects.get(id=session_id)
         session.state = request.POST.get("session_state")
         session.save()
-        sessions = Session.objects.filter(course__creator=facilitator).select_related(
-            "course"
-        )
+
+        get_latest_session(courses)
 
     context = {
         "courses": courses,
@@ -49,24 +58,6 @@ def teacher_dashboard(request):
     }
 
     return render(request, "thoughtswap/teacher_dashboard.html", context)
-
-
-def update_session_status(request):
-    print("Received request to update session status\n\n\n\n")
-    if request.method == "POST":
-        data = json.loads(request.body)
-        session_id = data.get("session_id")
-        new_status = data.get("status")
-        print("Updating session status:", session_id, new_status)
-
-        try:
-            session = Session.objects.get(id=session_id)
-            session.status = new_status
-            session.save()
-            return JsonResponse({"message": f"Status updated to {new_status}."})
-        except Session.DoesNotExist:
-            return JsonResponse({"message": "Session not found."}, status=404)
-    return JsonResponse({"message": "Invalid request."}, status=400)
 
 
 @login_required
@@ -108,3 +99,29 @@ def student_dashboard(request):
         "thoughtswap/dashboard.html",
         {"enrollments": enrollments, "active_sessions": active_sessions},
     )
+
+
+@login_required
+def thoughtswap_room(request, join_code):
+    course = get_object_or_404(Course, join_code=join_code)
+
+    session = course.sessions.order_by("-id").first()
+    print("Entering room")
+    if request.user == course.creator:
+        return render(
+            request,
+            "thoughtswap/facilitator_session.html",
+            {
+                "course": course,
+                "session": session,
+            },
+        )
+    else:
+        return render(
+            request,
+            "thoughtswap/participant_session.html",
+            {
+                "course": course,
+                "session": session,
+            },
+        )
