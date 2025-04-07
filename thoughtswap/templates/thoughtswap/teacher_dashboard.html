@@ -7,54 +7,18 @@
         <form action="" method="post">
             {% csrf_token %}
             <input type="hidden" name="course_id" value="{{ course.id }}">
-            <input type="hidden" name="course_session_id" value="{{ course.session.id }}">
-            <button onclick="showStudents('{{ course.id }}')">{{ course.title }}</button> : {{ course.join_code }} :
+            <input type="hidden" name="course_session_id" value="{{ course.latest_session.id }}">
+            <a href="{% url 'active_room' course.join_code %}">
+                {{ course.title }}
+            </a> {{ course.latest_session.state }} : {{ course.join_code }}
             <label for="state-a">a</label>
-            <input type="radio" name="session_state" id="state-a" value="a" {% if course.session.state == "a" %}checked{% endif %}>
+            <input type="radio" name="session_state" id="state-a" value="a" {% if course.latest_session.state == "a" %}checked{% endif %}>
             <label for="state-i">i</label>
-            <input type="radio" name="session_state" id="state-i" value="i" {% if course.session.state == "i" %}checked{% endif %}>
+            <input type="radio" name="session_state" id="state-i" value="i" {% if course.latest_session.state == "i" %}checked{% endif %}>
             <label for="state-d">d</label>
-            <input type="radio" name="session_state" id="state-d" value="d" {% if course.session.state == "d" %}checked{% endif %}>
-            <button onclick="updateSessionStatus('{{ course.session.id }}', 'a')">Active</button>
-            <button onclick="updateSessionStatus('{{ course.session.id }}', 'i')">Inactive</button>
-            <button onclick="updateSessionStatus('{{ course.session.id }}', 'd')">Draft</button>
-            <ul id="students-{{ course.id }}" style="display: none;">
-                {% for enrollment in course.enrollment_set.all %}
-                {% if enrollment.role == "s" %}
-                <li>{{ enrollment.user.username }}</li>
-                {% endif %}
-                {% endfor %}
-            </ul>
+            <input type="radio" name="session_state" id="state-d" value="d" {% if course.latest_session.state == "d" %}checked{% endif %}>
             <button type="submit">Submit</button>
         </form>
     </li>
     {% endfor %}
 </ul>
-
-<script>
-    function showStudents(courseId) {
-        const list = document.getElementById(`students-${courseId}`);
-        const usernames = Array.from(list.children).map(li => li.textContent.trim());
-        alert("Students:\n" + usernames.join("\n"));
-    }
-
-    function updateSessionStatus(sessionId, status) {
-        console.log("Updating session status for sessionId: ", sessionId, " to status: ", status);
-        csrf_token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-        console.log("Token: ", csrf_token);
-        fetch('/update-session-status/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}',
-            },
-            body: JSON.stringify({
-                session_id: sessionId,
-                status: status
-            })
-        })
-            .then(data => {
-                alert(data);
-            });
-    }
-</script>

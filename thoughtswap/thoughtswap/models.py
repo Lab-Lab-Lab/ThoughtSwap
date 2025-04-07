@@ -61,8 +61,8 @@ class Prompt(models.Model):
 
 
 class Session(models.Model):
-    course = models.OneToOneField(
-        Course, on_delete=models.CASCADE, related_name="session"
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="sessions"
     )
 
     SESSION_STATE = (
@@ -94,6 +94,7 @@ class PromptUse(models.Model):
     prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE)
     # our docs show begin and end fields, but we don't remember why
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
