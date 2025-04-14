@@ -200,6 +200,8 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
         distribution_pool = responses[:]
         print("Distribution pool:", distribution_pool)
 
+
+        # make sure its not 2+ responses from the same student
         while len(distribution_pool) < len(all_students):
             distribution_pool.append(random.choice(responses))
 
