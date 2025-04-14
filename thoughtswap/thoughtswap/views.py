@@ -100,20 +100,34 @@ def student_dashboard(request):
         {"enrollments": enrollments, "active_sessions": active_sessions},
     )
 
-
 @login_required
 def thoughtswap_room(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
+    session = course.sessions.filter(state="a").first()
 
-    session = course.sessions.order_by("-id").first()
-    print("Entering room")
+    if not session:
+        return render(request, "thoughtswap/facilitator_session.html", {
+            "course": course,
+            "error": "No active session."
+        })
+
     if request.user == course.creator:
+        prompt_data = []
+        for pu in session.promptuse_set.select_related('prompt').prefetch_related('thought_set').order_by('-created_at'):
+            prompt_data.append({
+                "prompt": pu.prompt.content,
+                "prompt_use_id": pu.id,
+                "thoughts": [t.content for t in pu.thought_set.all()]
+            })
+
+
         return render(
             request,
             "thoughtswap/facilitator_session.html",
             {
                 "course": course,
                 "session": session,
+                "session_data": prompt_data,
             },
         )
     else:
@@ -125,3 +139,5 @@ def thoughtswap_room(request, join_code):
                 "session": session,
             },
         )
+
+
