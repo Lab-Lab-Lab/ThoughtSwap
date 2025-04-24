@@ -41,15 +41,6 @@
     }
 
 
-    // Make a state for the swapping of thoughts
-    if (data.type === "received_thought") {
-        console.log("Received thought:", data.content);
-            document.getElementById("currentPrompt").innerText = "Discuss this response: " + data.content;
-            document.getElementById("responseForm").style.display = "none";
-        }
-
-
-
 </script>
 
 
