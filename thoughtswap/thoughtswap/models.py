@@ -78,6 +78,9 @@ class Session(models.Model):
         help_text="Session state",
     )
 
+    is_swapping = models.BooleanField(default=False)
+
+
     begin = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -120,6 +120,13 @@ def thoughtswap_room(request, join_code):
                 "thoughts": [t.content for t in pu.thought_set.all()]
             })
 
+        prompts = {}
+        for group in prompt_data: 
+            prompts[group["prompt_use_id"]]={
+                "content": group["prompt"], #FIXME: this is possible injection if we don't sanitize (eg with escapejs)
+                "responses": group["thoughts"]
+            }
+                    
 
         return render(
             request,
@@ -127,7 +134,7 @@ def thoughtswap_room(request, join_code):
             {
                 "course": course,
                 "session": session,
-                "session_data": prompt_data,
+                "prompts": prompts
             },
         )
     else:
