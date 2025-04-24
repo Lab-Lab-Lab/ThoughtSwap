@@ -32,3 +32,7 @@ class User(AbstractUser):
 
         """
         return reverse("users:detail", kwargs={"username": self.username})
+
+    def is_facilitator(self) -> bool:
+        return self.groups.filter(name="Facilitator").count() > 0
+

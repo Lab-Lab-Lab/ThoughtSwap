@@ -18,7 +18,6 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
         self.course = await self.get_course_by_code(self.course_code)
         self.session = await self.get_active_session(self.course)
 
-
         if self.course and self.session:
             await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
@@ -27,7 +26,14 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
 
-            await self.accept()
+            await self.accept()  # 🔑 accept FIRST
+
+            # NOW it is safe to send messages
+            if self.session.is_swapping:
+                await self.send(text_data=json.dumps({
+                    "type": "session_phase",
+                    "phase": "swapping"
+                }))
 
             active_prompt_use = await self.get_active_prompt_use(self.session)
             if active_prompt_use:
@@ -39,6 +45,7 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                 }))
         else:
             await self.close()
+
 
 
     @database_sync_to_async
@@ -91,7 +98,20 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
         
         elif msg_type == "swap_responses":
             print("Swapping responses!!!!")
+
+            self.session.is_swapping = True
+            await database_sync_to_async(self.session.save)()
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "session_phase",
+                    "phase": "swapping"
+                }
+            )
+
             await self.swap_responses()
+
 
 
 
@@ -167,6 +187,7 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
         print("Swapping responses inside function")
         user = self.scope["user"]
         course = self.course 
+        # pass in session already being used 
         session = await self.get_active_session(course)
         print("Session:", session)
         print("Course:", course.id)
@@ -180,10 +201,10 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
 
         thoughts = await self.get_thoughts(latest_prompt_use)
         if len(thoughts) < 2:
-            return
+            return # TODO: maybe return an error message object? maybe like the channels/js version of https://docs.djangoproject.com/en/5.1/ref/contrib/messages/
 
-        student_ids = list(set(t.author_id for t in thoughts))
-        print("Student IDs:", student_ids)
+        student_ids_who_authored = list(set(t.author_id for t in thoughts))
+        print("Student IDs:", student_ids_who_authored)
         # All students may include students who are not in the current session (great for testing actually)
         # What happens if someone joins late? I know we want them to get something to discuss but how?
         # - if there were more sresponses than students, they shoud get one that hasnt been seen before 
@@ -191,7 +212,7 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
         all_students = await self.get_all_participant_users(course)
         print("All students:", all_students)
 
-        if len(student_ids) < 2 or len(all_students) < 2:
+        if len(student_ids_who_authored) < 2 or len(all_students) < 2:
             print("Not enough students to swap responses.") 
             return
 
@@ -202,6 +223,7 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
 
 
         # make sure its not 2+ responses from the same student
+        # duplicate enough thoughts to have 1 available for every enrolled student
         while len(distribution_pool) < len(all_students):
             distribution_pool.append(random.choice(responses))
 
@@ -240,6 +262,12 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "received_thought",
             "content": event["content"]
+        }))
+
+    async def session_phase(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "session_phase",
+            "phase": event["phase"]
         }))
 
 
