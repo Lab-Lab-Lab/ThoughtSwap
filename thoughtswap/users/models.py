@@ -21,8 +21,8 @@ class User(AbstractUser):
 
     # First and last name do not cover name patterns around the globe
     name = CharField(_("Name of User"), blank=True, max_length=255)
-    first_name = None  # type: ignore[assignment]
-    last_name = None  # type: ignore[assignment]
+    first_name = models.CharField(_("First name"), max_length=150, blank=True)
+    last_name = models.CharField(_("Last name"), max_length=150, blank=True)
 
     def get_absolute_url(self) -> str:
         """Get URL for user's detail view.
@@ -32,3 +32,7 @@ class User(AbstractUser):
 
         """
         return reverse("users:detail", kwargs={"username": self.username})
+
+    def is_facilitator(self) -> bool:
+        return self.groups.filter(name="Facilitator").count() > 0
+

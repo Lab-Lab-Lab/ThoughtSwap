@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Facilitator</h2>
+
+<textarea id="promptText" placeholder="Write a prompt..."></textarea>
+<button onclick="sendPrompt()">Send Prompt</button>
+<button onclick="sendSwap()">Swap Responses</button>
+
+<hr>
+
+<div id="activePromptDisplay">
+    <h4 id="activePromptText">Loading prompt...</h4>
+    <ul id="activeResponseList"></ul>
+</div>
+
+<label for="promptSelector" class="mt-3">Select past prompt:</label>
+<select id="promptSelector" onchange="changePrompt(this.value)">
+</select>
+
+<script>
+    const socket = new WebSocket("ws://" + window.location.host + "/ws/thoughtswap/{{ course.join_code }}/");
+
+    const prompts = {{prompts|safe}};
+    const promptIds = Object.keys(prompts);
+    let activePromptId = promptIds[promptIds.length - 1];
+
+    function renderActivePrompt(promptId) {
+        const prompt = prompts[promptId];
+        if (!prompt) return;
+
+        document.getElementById("activePromptText").innerText = prompt.content;
+
+        const ul = document.getElementById("activeResponseList");
+        ul.innerHTML = "";
+        prompt.responses.forEach(resp => {
+            const li = document.createElement("li");
+            li.innerText = resp;
+            ul.appendChild(li);
+        });
+
+        document.getElementById("promptSelector").value = promptId;
+    }
+
+    function populatePromptDropdown() {
+        const dropdown = document.getElementById("promptSelector");
+        dropdown.innerHTML = "";
+
+        for (const pid in prompts) {
+            const opt = document.createElement("option");
+            opt.value = pid;
+            opt.textContent = prompts[pid].content;
+            dropdown.appendChild(opt);
+        }
+    }
+
+    function changePrompt(promptId) {
+        activePromptId = promptId;
+        renderActivePrompt(promptId);
+    }
+
+    socket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        const promptId = String(data.prompt_id);
+
+        if (data.type === "new_prompt") {
+            if (!prompts[promptId]) {
+                prompts[promptId] = {
+                    content: data.content,
+                    responses: []
+                };
+                populatePromptDropdown();
+            }
+
+            activePromptId = promptId;
+            renderActivePrompt(promptId);
+        }
+
+        if (data.type === "new_thought") {
+            if (!prompts[promptId]) {
+                prompts[promptId] = {
+                    content: "(Unknown prompt)",
+                    responses: []
+                };
+                populatePromptDropdown();
+            }
+
+            prompts[promptId].responses.push(data.content);
+
+            if (promptId === activePromptId) {
+                renderActivePrompt(promptId);
+            }
+        }
+    };
+
+    function sendPrompt() {
+        const content = document.getElementById("promptText").value;
+        if (content.trim() === "") return;
+
+        socket.send(JSON.stringify({
+            type: "disperse_prompt",
+            content: content
+        }));
+        document.getElementById("promptText").value = "";
+    }
+
+    function sendSwap() {
+        socket.send(JSON.stringify({
+            type: "swap_responses"
+        }));
+    }
+
+    // Initial render
+    populatePromptDropdown();
+    renderActivePrompt(activePromptId);
+</script>
+
+{% endblock %}

@@ -22,7 +22,11 @@ class Course(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+<<<<<<< HEAD
         return self.name
+=======
+        return self.title
+>>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
 
 
 # since the coockiecutter-django starter code has groups and permissions to go
@@ -61,7 +65,13 @@ class Prompt(models.Model):
 
 
 class Session(models.Model):
+<<<<<<< HEAD
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+=======
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="sessions"
+    )
+>>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
 
     SESSION_STATE = (
         ("a", "Active"),
@@ -72,15 +82,31 @@ class Session(models.Model):
     state = models.CharField(
         max_length=1,
         choices=SESSION_STATE,
+<<<<<<< HEAD
         default="d",
         help_text="Session state",
     )
 
+=======
+        default="a",
+        help_text="Session state",
+    )
+
+    is_swapping = models.BooleanField(default=False)
+
+
+>>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
     begin = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+<<<<<<< HEAD
+=======
+    def __str__(self):
+        return f"{self.state}"
+
+>>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
 
 # 2 use cases:
 # 1. prof wants to use this prompt in class tmr, so make it (the Prompt) today so they can just click it in realtime tmr (which would then instantiate the PromptUse). to be fully motivating we actually have to imagine they have 2 prompts in mind for tmr
@@ -89,6 +115,10 @@ class PromptUse(models.Model):
     prompt = models.ForeignKey(Prompt, on_delete=models.CASCADE)
     # our docs show begin and end fields, but we don't remember why
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
+<<<<<<< HEAD
+=======
+    is_active = models.BooleanField(default=False)
+>>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

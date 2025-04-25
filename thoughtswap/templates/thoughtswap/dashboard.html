@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Welcome, {{ user.username }}!</h2>
+
+<h3>Your Courses</h3>
+<a href="/thoughtswap/join">Join a new course</a>
+
+{% if enrollments %}
+<ul>
+    {% for enrollment in enrollments %}
+    <li>
+        {% with course=enrollment.course %}
+        {{ course.title }}
+
+        {% if course.id in active_sessions %}
+        <a href="{% url 'active_room' course.join_code %}">Join Session</a>
+        {% else %}
+        {% endif %}
+        {% endwith %}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>You are not enrolled in any courses yet.</p>
+{% endif %}
+{% endblock %}

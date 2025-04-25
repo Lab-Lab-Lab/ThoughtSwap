@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Student</h2>
+
+
+
+<script>
+    const socket = new WebSocket("ws://" + window.location.host + "/ws/thoughtswap/{{ course.join_code }}/");
+
+    socket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        console.log("WebSocket message received:", data);
+
+        if (data.type === "new_prompt") {
+            isSwapping = false;
+            document.getElementById("currentPrompt").innerText = data.content;
+            document.getElementById("currentPrompt").dataset.thoughtSet = "";
+            document.getElementById("responseForm").style.display = "block";
+        }
+
+        if (data.type === "received_thought") {
+            console.log("Received swapped thought:", data.content);
+            document.getElementById("currentPrompt").innerText = "Discuss this response: " + data.content;
+            document.getElementById("currentPrompt").dataset.thoughtSet = "true";
+            document.getElementById("responseForm").style.display = "none";
+        }
+
+        
+
+    };
+
+    function submitResponse() {
+        const content = document.getElementById("responseText").value;
+        console.log("Sending response:", content);
+        socket.send(JSON.stringify({
+            type: "submit_thought",
+            content: content
+        }));
+        document.getElementById("responseText").value = "";
+    }
+
+
+</script>
+
+
+
+<p id="currentPrompt">Waiting for a prompt...</p>
+<div id="responseForm" style="display:none;">
+    <textarea id="responseText" placeholder="Your response..."></textarea>
+    <button onclick="submitResponse()">Submit</button>
+</div>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Join a Course</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <label for="join_code">Enter Join Code:</label>
+    <input type="text" id="join_code" name="join_code" maxlength="6" required>
+    <button type="submit">Join</button>
+</form>
+{% if error %}
+<p style="color: red;">{{ error }}</p>
+{% endif %}
+{% endblock %}
