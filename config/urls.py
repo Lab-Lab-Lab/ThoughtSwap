@@ -7,6 +7,8 @@ from django.urls import include
 from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
+from thoughtswap.thoughtswap import views
+
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
@@ -27,6 +29,9 @@ urlpatterns = [
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
+    path('prompt-bank/', views.prompt_bank_view, name='prompt_bank'),
+    path('add-prompt-to-bank/', views.add_prompt_to_bank, name='add_prompt_to_bank'),
+
 ]
 
 

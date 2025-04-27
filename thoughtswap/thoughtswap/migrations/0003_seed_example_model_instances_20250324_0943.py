@@ -97,6 +97,13 @@ def seed_mvp(apps, schema_editor):
         content="Example Prompt - Edward Snowden patriot or traitor?",
     )
 
+    # create a prompt for the prompt bank
+    prompt_in_bank = Prompt.objects.create(
+        author=teacher,
+        content="Example Prompt - Will JMU football be undefeated in the 2025 season?",
+        in_bank=True,
+    )
+
     # create a session
     draft_session = Session.objects.create(
         course=course,

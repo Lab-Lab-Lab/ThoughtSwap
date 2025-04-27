@@ -6,6 +6,18 @@
 <textarea id="promptText" placeholder="Write a prompt..."></textarea>
 <button onclick="sendPrompt()">Send Prompt</button>
 <button onclick="sendSwap()">Swap Responses</button>
+<button onclick="promptBank()">Prompt Bank</button>
+
+<div id="promptBankModal">
+    <ul id="promptBankList"></ul>
+    <button onclick="closePromptBank()">Close</button>
+</div>
+
+<div id="modalBackdrop"
+
+    onclick="closePromptBank()">
+</div>
+
 
 <hr>
 
@@ -21,7 +33,7 @@
 <script>
     const socket = new WebSocket("ws://" + window.location.host + "/ws/thoughtswap/{{ course.join_code }}/");
 
-    const prompts = {{prompts|safe}};
+    const prompts = {{ prompts| safe}};
     const promptIds = Object.keys(prompts);
     let activePromptId = promptIds[promptIds.length - 1];
 
@@ -91,6 +103,32 @@
                 renderActivePrompt(promptId);
             }
         }
+
+        if (data.type === "prompt_bank_data") {
+            const bankList = document.getElementById("promptBankList");
+            bankList.innerHTML = "";
+
+            const sortedPrompts = data.prompts.sort((a, b) => b.id - a.id); 
+            console.log("sorted prompts", sortedPrompts);
+
+            if (sortedPrompts.length === 0) {
+                const li = document.createElement("li");
+                li.innerText = "No prompts available.";
+                bankList.appendChild(li);
+            } else {
+                sortedPrompts.forEach(prompt => {
+                    const li = document.createElement("li");
+                    li.innerText = prompt.content;
+                    const btn = document.createElement("button");
+                    btn.innerText = "Send Prompt";
+                    btn.onclick = () => sendPromptFromBank(prompt.id);
+                    li.appendChild(btn);
+                    bankList.appendChild(li);
+                });
+            }
+
+            openPromptBank();
+        }
     };
 
     function sendPrompt() {
@@ -109,8 +147,33 @@
             type: "swap_responses"
         }));
     }
+    function promptBank() {
+        console.log("Requesting prompt bank");
+        socket.send(JSON.stringify({
+            type: "prompt_bank"
+        }));
+    }
 
-    // Initial render
+    function sendPromptFromBank(promptId) {
+        socket.send(JSON.stringify({
+            type: "send_bank_prompt",
+            prompt_id: promptId
+        }));
+        closePromptBank();
+    }
+
+    function openPromptBank() {
+        document.getElementById("promptBankModal").style.display = "block";
+        document.getElementById("modalBackdrop").style.display = "block";
+    }
+
+    function closePromptBank() {
+        document.getElementById("promptBankModal").style.display = "none";
+        document.getElementById("modalBackdrop").style.display = "none";
+    }
+
+
+
     populatePromptDropdown();
     renderActivePrompt(activePromptId);
 </script>
