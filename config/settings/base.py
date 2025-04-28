@@ -98,11 +98,7 @@ LOCAL_APPS = [
     "thoughtswap.users",
     "thoughtswap.chat",
     # Your stuff: custom apps go here
-<<<<<<< HEAD
-    "thoughtswap.thoughtswap"
-=======
     "thoughtswap.thoughtswap",
->>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
