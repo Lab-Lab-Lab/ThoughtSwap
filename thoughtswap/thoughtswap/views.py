@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-from django.shortcuts import render
-
-# Create your views here.
-=======
 from django.shortcuts import render, redirect, get_object_or_404
 from thoughtswap.users.models import User
 from .models import Enrollment, Prompt, Course, Session
@@ -152,5 +147,3 @@ def thoughtswap_room(request, join_code):
             },
         )
 
-
->>>>>>> 06c019e81daa0338677ab2300c11b559078586dd

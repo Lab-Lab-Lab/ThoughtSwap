@@ -18,9 +18,6 @@ def seed_mvp(apps, schema_editor):
     teacher = User.objects.create_user(
         username="teacher",
         email="teacher@thoughtswap.org",
-<<<<<<< HEAD
-        password=make_password("teacher"),
-=======
         password="teacher",
     )
     teacher.first_name = "Teacher"
@@ -32,7 +29,6 @@ def seed_mvp(apps, schema_editor):
         username="teacher2",
         email="teacher2@thoughtswap.org",
         password="teacher",
->>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
     )
     teacher.first_name = "Teacher"
     teacher.last_name = "User"
@@ -40,12 +36,6 @@ def seed_mvp(apps, schema_editor):
 
     # create a course
     course = Course.objects.create(
-<<<<<<< HEAD
-        title="Example Course",
-        creator=teacher,
-    )
-
-=======
         title="Example Course CS 455",
         creator=teacher,
     )
@@ -55,7 +45,6 @@ def seed_mvp(apps, schema_editor):
         creator=teacher2,
     )
 
->>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
     # enroll the teacher in the course
     Enrollment.objects.create(
         user=teacher,
@@ -63,8 +52,6 @@ def seed_mvp(apps, schema_editor):
         role="f",
     )
 
-<<<<<<< HEAD
-=======
     # enroll the teacher2 in the course
     Enrollment.objects.create(
         user=teacher2,
@@ -72,35 +59,19 @@ def seed_mvp(apps, schema_editor):
         role="f",
     )
 
->>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
     # create a student
     student1 = User.objects.create_user(
         username="student1",
         email="student1@thoughtswap.org",
-<<<<<<< HEAD
-        password=make_password("student"),
-    )
-    student1.first_name = "Student1"
-    student1.last_name = "User"
-    student1.save()
-=======
         password="student",
     )
     # student1.first_name = "Student1"
     # student1.last_name = "User"
     # student1.save()
->>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
 
     student2 = User.objects.create_user(
         username="student2",
         email="student2@thoughtswap.org",
-<<<<<<< HEAD
-        password=make_password("student"),
-    )
-    student2.first_name = "Student2"
-    student2.last_name = "User"
-    student2.save()
-=======
         password="student",
         # first_name = "Student2",
         # last_name = "User"
@@ -108,7 +79,6 @@ def seed_mvp(apps, schema_editor):
     # student2.first_name = "Student2"
     # student2.last_name = "User"
     # student2.save()
->>>>>>> 06c019e81daa0338677ab2300c11b559078586dd
 
     Enrollment.objects.create(
         user=student1,
