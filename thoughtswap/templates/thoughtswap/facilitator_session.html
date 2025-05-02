@@ -89,6 +89,9 @@
         }
 
         if (data.type === "new_thought") {
+            console.log("Received new thought:", data);
+            const pid = data.prompt_id;
+            console.log("Prompt ID:", pid);
             if (!prompts[promptId]) {
                 prompts[promptId] = {
                     content: "(Unknown prompt)",

@@ -92,7 +92,7 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                     {
                         "type": "new_thought",
                         "content": thought.content,
-                        "prompt_id": thought.prompt_use.id,
+                        "prompt_id": thought.prompt_use_id,
                     },
                 )
         
@@ -144,14 +144,18 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
             text_data=json.dumps({"type": "new_prompt", "content": event["content"]})
         )
 
-
     async def new_thought(self, event):
         if await self.is_facilitator():
             await self.send(
                 text_data=json.dumps(
-                    {"type": "new_thought", "content": event["content"]}
+                    {
+                        "type": "new_thought",
+                        "content": event["content"],
+                        "prompt_id": event["prompt_id"],
+                    }
                 )
             )
+
 
     @database_sync_to_async
     def get_course_by_code(self, code):
