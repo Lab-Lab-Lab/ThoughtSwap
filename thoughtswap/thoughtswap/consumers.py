@@ -26,9 +26,8 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
 
-            await self.accept()  # 🔑 accept FIRST
+            await self.accept()
 
-            # NOW it is safe to send messages
             if self.session.is_swapping:
                 await self.send(text_data=json.dumps({
                     "type": "session_phase",
@@ -66,7 +65,8 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
 
         if msg_type == "disperse_prompt" and await self.is_facilitator():
             content = data.get("content")
-            prompt_use = await self.create_prompt_and_use(content)
+            prompt = await self.create_prompt(content)
+            prompt_use = await self.create_prompt_use(prompt)
             prompt_content = await self.get_prompt_content(prompt_use)
 
             await self.channel_layer.group_send(
@@ -92,7 +92,7 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                     {
                         "type": "new_thought",
                         "content": thought.content,
-                        "prompt_id": thought.prompt_use.id,
+                        "prompt_id": thought.prompt_use_id,
                     },
                 )
         
@@ -112,7 +112,30 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
 
             await self.swap_responses()
 
+        elif msg_type == "prompt_bank":
+            print("Getting prompt bank data\n\n\n")
+            prompts = await database_sync_to_async(list)(
+                Prompt.objects.filter(author=self.user, in_bank=True).values("id", "content")
+            )
+            print("Prompts:", prompts)
+            await self.send(text_data=json.dumps({
+                "type": "prompt_bank_data",
+                "prompts": prompts
+            }))
 
+        elif msg_type == "send_bank_prompt":
+            prompt_id = data.get("prompt_id")
+            prompt = await database_sync_to_async(Prompt.objects.get)(id=prompt_id)
+            prompt_use = await self.create_prompt_use(prompt)
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "new_prompt",
+                    "content": prompt.content,
+                    "prompt_id": prompt_use.id,
+                }
+            )
 
 
 
@@ -121,14 +144,18 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
             text_data=json.dumps({"type": "new_prompt", "content": event["content"]})
         )
 
-
     async def new_thought(self, event):
         if await self.is_facilitator():
             await self.send(
                 text_data=json.dumps(
-                    {"type": "new_thought", "content": event["content"]}
+                    {
+                        "type": "new_thought",
+                        "content": event["content"],
+                        "prompt_id": event["prompt_id"],
+                    }
                 )
             )
+
 
     @database_sync_to_async
     def get_course_by_code(self, code):
@@ -145,14 +172,24 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
     def get_active_prompt_use(self, session):
         return PromptUse.objects.filter(session=session, is_active=True).first()
 
+    # @database_sync_to_async
+    # def create_prompt_and_use(self, content):
+    #     prompt = Prompt.objects.create(author=self.user, content=content)
+    #     PromptUse.objects.filter(session=self.session).update(is_active=False)
+    #     prompt_use = PromptUse.objects.create(
+    #         prompt=prompt, session=self.session, is_active=True
+    #     )
+    #     return prompt_use
+
     @database_sync_to_async
-    def create_prompt_and_use(self, content):
-        prompt = Prompt.objects.create(author=self.user, content=content)
+    def create_prompt(self, content):
+        return Prompt.objects.create(author=self.user, content=content)
+
+    @database_sync_to_async
+    def create_prompt_use(self, prompt):
         PromptUse.objects.filter(session=self.session).update(is_active=False)
-        prompt_use = PromptUse.objects.create(
-            prompt=prompt, session=self.session, is_active=True
-        )
-        return prompt_use
+        return PromptUse.objects.create(prompt=prompt, session=self.session, is_active=True)
+
 
     @database_sync_to_async
     def get_thoughts(self, prompt_use):
@@ -255,8 +292,6 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-
-
     async def distribute_thought(self, event):
         print("Inside distribute_thought, sending to client:", event["content"])
         await self.send(text_data=json.dumps({
@@ -269,6 +304,18 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
             "type": "session_phase",
             "phase": event["phase"]
         }))
+
+
+    async def new_prompt(self, event):
+        content = event["content"]
+        prompt_id = event["prompt_id"]
+
+        await self.send(text_data=json.dumps({
+            "type": "new_prompt",
+            "content": content,
+            "prompt_id": prompt_id,
+        }))
+
 
 
 

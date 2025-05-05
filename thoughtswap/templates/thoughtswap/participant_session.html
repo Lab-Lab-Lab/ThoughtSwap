@@ -32,6 +32,10 @@
 
     function submitResponse() {
         const content = document.getElementById("responseText").value;
+        if (content.trim() === "") {
+            alert("Please enter a response before submitting.");
+            return;
+        }
         console.log("Sending response:", content);
         socket.send(JSON.stringify({
             type: "submit_thought",

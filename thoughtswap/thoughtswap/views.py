@@ -4,6 +4,7 @@ from .models import Enrollment, Prompt, Course, Session
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import now
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 import json
 
 
@@ -14,11 +15,7 @@ def prompt_list(request):
 
 def get_latest_session(courses):
     for course in courses:
-        # If you used related_name="sessions" in your Session model:
         course.latest_session = course.sessions.order_by("-id").first()
-
-        # If you did NOT use related_name, uncomment the line below and comment the one above:
-        # course.latest_session = course.session_set.order_by('-id').first()
 
 
 @login_required  # FIXME this would check the enrollment's ROLE to decide if this is visible
@@ -146,4 +143,25 @@ def thoughtswap_room(request, join_code):
                 "session": session,
             },
         )
+    
+
+def prompt_bank_view(request):
+    prompts = Prompt.objects.filter(author=request.user, in_bank=True).order_by('-id')
+    prompt_data = list(prompts.values('id', 'content'))
+    return JsonResponse({'prompts': prompt_data})
+
+
+@csrf_exempt
+def add_prompt_to_bank(request):
+    if request.method == "POST":
+        body = json.loads(request.body)
+        content = body.get('content')
+
+        prompt = Prompt.objects.create(
+            author=request.user,
+            content=content,
+            in_bank=True
+        )
+        return JsonResponse({'status': 'ok', 'id': prompt.id})
+    return JsonResponse({'error': 'invalid method'}, status=400)
 

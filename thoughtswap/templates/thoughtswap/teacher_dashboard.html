@@ -24,4 +24,55 @@
     </li>
     {% endfor %}
 </ul>
+
+<hr>
+
+<h3>Prompt Bank</h3>
+<ul id="promptBankList"></ul>
+
+<h6>Add a New Prompt to Bank</h6>
+<textarea id="newPromptText" placeholder="Write a new prompt..."></textarea><br>
+<button onclick="addPromptToBank()">Add to Bank</button>
+
+<script>
+    function loadPromptBank() {
+        fetch("/prompt-bank/")
+            .then(response => response.json())
+            .then(data => {
+                const bankList = document.getElementById("promptBankList");
+                bankList.innerHTML = "";
+
+                const sortedPrompts = data.prompts.sort((a, b) => b.id - a.id);
+
+                sortedPrompts.forEach(prompt => {
+                    const li = document.createElement("li");
+                    li.innerText = prompt.content;
+                    bankList.appendChild(li);
+                });
+            });
+    }
+
+    function addPromptToBank() {
+        const content = document.getElementById("newPromptText").value;
+        if (content.trim() === "") return;
+
+        fetch("/add-prompt-to-bank/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({ content: content })
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("newPromptText").value = "";
+                loadPromptBank();
+            });
+    }
+
+    window.onload = loadPromptBank;
+</script>
+
+
 {% endblock %}
