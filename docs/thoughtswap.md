@@ -50,7 +50,7 @@ Thought Swap is a discussion facilitation app where a facilitator sends prompts 
 
 - Swapping thoughts needs to be more robust
 - Late joiners need to be fully addressed
-- Saftey and robustness of user contributions has not been fully tested
+- Safety and robustness of user contributions has not been fully tested
 
 ## Next Steps
 
@@ -60,7 +60,7 @@ Thought Swap is a discussion facilitation app where a facilitator sends prompts 
 - “Demo mode,” where the facilitator and/or participants need not create a lasting account
 - Functionality for late joiners
 - When swapping: if one author is more prolific for a certain prompt, before assigning all their thoughts to others, first ensure that each author's thoughts are assigned (and specifically to authors (users who have submitted for this prompt))
-- Somehow allow for the participants indicate their thoguhts about the ditributed thought
+- Somehow allow for the participants indicate their thoughts about the distributed thought
 - Start having semantic analysis
 - Find some way to track how the discussion went (Form for after the discussion?)
 - Participant view for the facilitator
