@@ -165,4 +165,3 @@ def add_prompt_to_bank(request):
         return JsonResponse({'status': 'ok', 'id': prompt.id})
     return JsonResponse({'error': 'invalid method'}, status=400)
 
-

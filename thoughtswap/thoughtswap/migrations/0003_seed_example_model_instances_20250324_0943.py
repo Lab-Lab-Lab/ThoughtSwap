@@ -108,7 +108,7 @@ def seed_mvp(apps, schema_editor):
     draft_session = Session.objects.create(
         course=course,
         state="a",
-        begin="2025-03-24 09:43:00",
+        begin="2025-04-27 01:16:53.260222+00:00",
     )
 
     prompt_use = PromptUse.objects.create(

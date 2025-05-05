@@ -81,7 +81,6 @@ class Session(models.Model):
 
     is_swapping = models.BooleanField(default=False)
 
-
     begin = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -89,7 +88,6 @@ class Session(models.Model):
 
     def __str__(self):
         return f"{self.state}"
-
 
 # 2 use cases:
 # 1. prof wants to use this prompt in class tmr, so make it (the Prompt) today so they can just click it in realtime tmr (which would then instantiate the PromptUse). to be fully motivating we actually have to imagine they have 2 prompts in mind for tmr

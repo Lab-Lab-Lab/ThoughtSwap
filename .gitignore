@@ -274,3 +274,4 @@ thoughtswap/media/
 
 .pytest_cache/
 .env
+*.sqlite3

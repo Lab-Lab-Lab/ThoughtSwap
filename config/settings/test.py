@@ -2,10 +2,9 @@
 With these settings, tests run faster.
 """
 
-from .base import *  # noqa: F403
-from .base import TEMPLATES
-from .base import env
-
+from .local import *  # noqa: F403
+from .local import TEMPLATES
+from .local import env
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
