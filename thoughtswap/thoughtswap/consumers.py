@@ -22,30 +22,30 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
             await self.channel_layer.group_add(
-                f"user_{self.user.id}",
-                self.channel_name
+                f"user_{self.user.id}", self.channel_name
             )
 
             await self.accept()
 
             if self.session.is_swapping:
-                await self.send(text_data=json.dumps({
-                    "type": "session_phase",
-                    "phase": "swapping"
-                }))
+                await self.send(
+                    text_data=json.dumps({"type": "session_phase", "phase": "swapping"})
+                )
 
             active_prompt_use = await self.get_active_prompt_use(self.session)
             if active_prompt_use:
                 prompt_content = await self.get_prompt_content(active_prompt_use)
-                await self.send(text_data=json.dumps({
-                    "type": "new_prompt",
-                    "content": prompt_content,
-                    "prompt_id": active_prompt_use.id,
-                }))
+                await self.send(
+                    text_data=json.dumps(
+                        {
+                            "type": "new_prompt",
+                            "content": prompt_content,
+                            "prompt_id": active_prompt_use.id,
+                        }
+                    )
+                )
         else:
             await self.close()
-
-
 
     @database_sync_to_async
     def is_facilitator(self):
@@ -61,7 +61,6 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         msg_type = data.get("type")
-        
 
         if msg_type == "disperse_prompt" and await self.is_facilitator():
             content = data.get("content")
@@ -75,17 +74,20 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                     "type": "broadcast_prompt",
                     "content": prompt_content,
                     "prompt_id": prompt_use.id,
-                }
+                },
             )
 
         elif msg_type == "submit_thought":
             content = data.get("content")
             thought = await self.store_thought(content)
-            print("About to send via WebSocket:", {
-                "type": "new_thought",
-                "content": thought.content,
-                "prompt_id": thought.prompt_use.id,
-            })
+            print(
+                "About to send via WebSocket:",
+                {
+                    "type": "new_thought",
+                    "content": thought.content,
+                    "prompt_id": thought.prompt_use.id,
+                },
+            )
             if thought:
                 await self.channel_layer.group_send(
                     self.room_group_name,
@@ -95,7 +97,7 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                         "prompt_id": thought.prompt_use_id,
                     },
                 )
-        
+
         elif msg_type == "swap_responses":
             print("Swapping responses!!!!")
 
@@ -103,11 +105,7 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
             await database_sync_to_async(self.session.save)()
 
             await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "session_phase",
-                    "phase": "swapping"
-                }
+                self.room_group_name, {"type": "session_phase", "phase": "swapping"}
             )
 
             await self.swap_responses()
@@ -115,13 +113,14 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
         elif msg_type == "prompt_bank":
             print("Getting prompt bank data\n\n\n")
             prompts = await database_sync_to_async(list)(
-                Prompt.objects.filter(author=self.user, in_bank=True).values("id", "content")
+                Prompt.objects.filter(author=self.user, in_bank=True).values(
+                    "id", "content"
+                )
             )
             print("Prompts:", prompts)
-            await self.send(text_data=json.dumps({
-                "type": "prompt_bank_data",
-                "prompts": prompts
-            }))
+            await self.send(
+                text_data=json.dumps({"type": "prompt_bank_data", "prompts": prompts})
+            )
 
         elif msg_type == "send_bank_prompt":
             prompt_id = data.get("prompt_id")
@@ -134,10 +133,8 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                     "type": "new_prompt",
                     "content": prompt.content,
                     "prompt_id": prompt_use.id,
-                }
+                },
             )
-
-
 
     async def broadcast_prompt(self, event):
         await self.send(
@@ -155,7 +152,6 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                     }
                 )
             )
-
 
     @database_sync_to_async
     def get_course_by_code(self, code):
@@ -188,8 +184,9 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def create_prompt_use(self, prompt):
         PromptUse.objects.filter(session=self.session).update(is_active=False)
-        return PromptUse.objects.create(prompt=prompt, session=self.session, is_active=True)
-
+        return PromptUse.objects.create(
+            prompt=prompt, session=self.session, is_active=True
+        )
 
     @database_sync_to_async
     def get_thoughts(self, prompt_use):
@@ -198,7 +195,9 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_all_participant_users(self, course):
         print("Getting all participant users")
-        enrollments = Enrollment.objects.filter(course_id=course.id, role='s').select_related("user")
+        enrollments = Enrollment.objects.filter(
+            course_id=course.id, role="s"
+        ).select_related("user")
         print("Enrollments:", enrollments)
         return [enrollment.user for enrollment in enrollments]
 
@@ -211,20 +210,16 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
         )
         if active:
             thought = Thought.objects.create(
-                prompt_use=active,
-                author=self.user,
-                content=content
+                prompt_use=active, author=self.user, content=content
             )
             return Thought.objects.select_related("prompt_use").get(id=thought.id)
         return None
 
-
-
     async def swap_responses(self):
         print("Swapping responses inside function")
         user = self.scope["user"]
-        course = self.course 
-        # pass in session already being used 
+        course = self.course
+        # pass in session already being used
         session = await self.get_active_session(course)
         print("Session:", session)
         print("Course:", course.id)
@@ -238,26 +233,25 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
 
         thoughts = await self.get_thoughts(latest_prompt_use)
         if len(thoughts) < 2:
-            return # TODO: maybe return an error message object? maybe like the channels/js version of https://docs.djangoproject.com/en/5.1/ref/contrib/messages/
+            return  # TODO: maybe return an error message object? maybe like the channels/js version of https://docs.djangoproject.com/en/5.1/ref/contrib/messages/
 
         student_ids_who_authored = list(set(t.author_id for t in thoughts))
         print("Student IDs:", student_ids_who_authored)
         # All students may include students who are not in the current session (great for testing actually)
         # What happens if someone joins late? I know we want them to get something to discuss but how?
-        # - if there were more sresponses than students, they shoud get one that hasnt been seen before 
+        # - if there were more sresponses than students, they shoud get one that hasnt been seen before
         # - if there are more students than responses, they should get a random one
         all_students = await self.get_all_participant_users(course)
         print("All students:", all_students)
 
         if len(student_ids_who_authored) < 2 or len(all_students) < 2:
-            print("Not enough students to swap responses.") 
+            print("Not enough students to swap responses.")
             return
 
         responses = [t for t in thoughts]
         print("Responses:", responses)
         distribution_pool = responses[:]
         print("Distribution pool:", distribution_pool)
-
 
         # make sure its not 2+ responses from the same student
         # duplicate enough thoughts to have 1 available for every enrolled student
@@ -279,44 +273,39 @@ class ThoughtSwapConsumer(AsyncWebsocketConsumer):
                 assigned = random.choice(distribution_pool)
             student_response_map[student.id] = assigned
             distribution_pool.remove(assigned)
-        
+
         print("Student response map:", student_response_map)
 
         for student_id, response in student_response_map.items():
             print(f"Sending to user_{student_id}: {response.content}")
             await self.channel_layer.group_send(
                 f"user_{student_id}",
-                {
-                    "type": "distribute_thought",
-                    "content": response.content
-                }
+                {"type": "distribute_thought", "content": response.content},
             )
 
     async def distribute_thought(self, event):
         print("Inside distribute_thought, sending to client:", event["content"])
-        await self.send(text_data=json.dumps({
-            "type": "received_thought",
-            "content": event["content"]
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {"type": "received_thought", "content": event["content"]}
+            )
+        )
 
     async def session_phase(self, event):
-        await self.send(text_data=json.dumps({
-            "type": "session_phase",
-            "phase": event["phase"]
-        }))
-
+        await self.send(
+            text_data=json.dumps({"type": "session_phase", "phase": event["phase"]})
+        )
 
     async def new_prompt(self, event):
         content = event["content"]
         prompt_id = event["prompt_id"]
 
-        await self.send(text_data=json.dumps({
-            "type": "new_prompt",
-            "content": content,
-            "prompt_id": prompt_id,
-        }))
-
-
-
-
-
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "new_prompt",
+                    "content": content,
+                    "prompt_id": prompt_id,
+                }
+            )
+        )

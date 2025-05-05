@@ -1,11 +1,14 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from thoughtswap.users.models import User
-from .models import Enrollment, Prompt, Course, Session
-from django.contrib.auth.decorators import login_required
-from django.utils.timezone import now
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import json
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
+
+from thoughtswap.users.models import User
+
+from .models import Course, Enrollment, Prompt, Session
 
 
 def prompt_list(request):
@@ -25,7 +28,7 @@ def teacher_dashboard(request):
     get_latest_session(courses)
 
     sessions = Session.objects.filter(course__creator=facilitator).select_related(
-        "course"
+        "course",
     )
 
     course_id = request.GET.get("course_id")
@@ -35,7 +38,7 @@ def teacher_dashboard(request):
     if course_id:
         selected_course = get_object_or_404(Course, id=course_id, creator=facilitator)
         students = User.objects.filter(
-            enrollment__course=selected_course, enrollment__role="s"
+            enrollment__course=selected_course, enrollment__role="s",
         )
 
     if request.method == "POST":
@@ -97,42 +100,47 @@ def student_dashboard(request):
         {"enrollments": enrollments, "active_sessions": active_sessions},
     )
 
+
 @login_required
 def thoughtswap_room(request, join_code):
     course = get_object_or_404(Course, join_code=join_code)
     session = course.sessions.filter(state="a").first()
 
     if not session:
-        return render(request, "thoughtswap/facilitator_session.html", {
-            "course": course,
-            "error": "No active session."
-        })
+        return render(
+            request,
+            "thoughtswap/facilitator_session.html",
+            {"course": course, "error": "No active session."},
+        )
 
     if request.user == course.creator:
         prompt_data = []
-        for pu in session.promptuse_set.select_related('prompt').prefetch_related('thought_set').order_by('-created_at'):
-            prompt_data.append({
-                "prompt": pu.prompt.content,
-                "prompt_use_id": pu.id,
-                "thoughts": [t.content for t in pu.thought_set.all()]
-            })
+        for pu in (
+            session.promptuse_set.select_related("prompt")
+            .prefetch_related("thought_set")
+            .order_by("-created_at")
+        ):
+            prompt_data.append(
+                {
+                    "prompt": pu.prompt.content,
+                    "prompt_use_id": pu.id,
+                    "thoughts": [t.content for t in pu.thought_set.all()],
+                },
+            )
 
         prompts = {}
-        for group in prompt_data: 
-            prompts[group["prompt_use_id"]]={
-                "content": group["prompt"], #FIXME: this is possible injection if we don't sanitize (eg with escapejs)
-                "responses": group["thoughts"]
+        for group in prompt_data:
+            prompts[group["prompt_use_id"]] = {
+                "content": group[
+                    "prompt"
+                ],  # FIXME: this is possible injection if we don't sanitize (eg with escapejs)
+                "responses": group["thoughts"],
             }
-                    
 
         return render(
             request,
             "thoughtswap/facilitator_session.html",
-            {
-                "course": course,
-                "session": session,
-                "prompts": prompts
-            },
+            {"course": course, "session": session, "prompts": prompts},
         )
     else:
         return render(
@@ -143,25 +151,22 @@ def thoughtswap_room(request, join_code):
                 "session": session,
             },
         )
-    
+
 
 def prompt_bank_view(request):
-    prompts = Prompt.objects.filter(author=request.user, in_bank=True).order_by('-id')
-    prompt_data = list(prompts.values('id', 'content'))
-    return JsonResponse({'prompts': prompt_data})
+    prompts = Prompt.objects.filter(author=request.user, in_bank=True).order_by("-id")
+    prompt_data = list(prompts.values("id", "content"))
+    return JsonResponse({"prompts": prompt_data})
 
 
 @csrf_exempt
 def add_prompt_to_bank(request):
     if request.method == "POST":
         body = json.loads(request.body)
-        content = body.get('content')
+        content = body.get("content")
 
         prompt = Prompt.objects.create(
-            author=request.user,
-            content=content,
-            in_bank=True
+            author=request.user, content=content, in_bank=True,
         )
-        return JsonResponse({'status': 'ok', 'id': prompt.id})
-    return JsonResponse({'error': 'invalid method'}, status=400)
-
+        return JsonResponse({"status": "ok", "id": prompt.id})
+    return JsonResponse({"error": "invalid method"}, status=400)
