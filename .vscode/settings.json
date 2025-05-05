@@ -4,5 +4,6 @@
     ],
     "cSpell.words": [
         "thoughtswap"
-    ]
+    ],
+    "isort.check": true
 }

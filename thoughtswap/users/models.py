@@ -35,4 +35,3 @@ class User(AbstractUser):
 
     def is_facilitator(self) -> bool:
         return self.groups.filter(name="Facilitator").count() > 0
-

@@ -29,9 +29,8 @@ urlpatterns = [
     # ...
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
-    path('prompt-bank/', views.prompt_bank_view, name='prompt_bank'),
-    path('add-prompt-to-bank/', views.add_prompt_to_bank, name='add_prompt_to_bank'),
-
+    path("prompt-bank/", views.prompt_bank_view, name="prompt_bank"),
+    path("add-prompt-to-bank/", views.add_prompt_to_bank, name="add_prompt_to_bank"),
 ]
 
 
